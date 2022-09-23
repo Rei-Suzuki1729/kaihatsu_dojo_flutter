@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fl_chart/fl_chart.dart';
+import './enterChosi.dart';
+import './recentChosi.dart';
+import './trendChosi.dart';
 
 void main() {
   runApp(const MyApp());

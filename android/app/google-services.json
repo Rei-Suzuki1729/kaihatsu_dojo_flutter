@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "74341742529",
+    "firebase_url": "https://kaihatsudojo-flutter-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "kaihatsudojo-flutter",
+    "storage_bucket": "kaihatsudojo-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74341742529:android:eef72e1a30d62b99ac6140",
+        "android_client_info": {
+          "package_name": "com.example.first_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "74341742529-s3oube62glb5hreoqge8mnojpuuuc4ja.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBX4NXRKz-6HDBWEMEN4RI3wdLSQve6gOE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "74341742529-s3oube62glb5hreoqge8mnojpuuuc4ja.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "74341742529-nl89qaigar8nskdbkmpbbkgmfmrldpbd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.firstApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
