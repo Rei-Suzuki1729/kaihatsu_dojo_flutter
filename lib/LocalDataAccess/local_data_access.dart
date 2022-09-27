@@ -8,7 +8,7 @@ import 'dart:io';
 Future<bool> isObserved(Factors factor) async {
   final pref = await SharedPreferences.getInstance();
   final result = pref.getBool(toString(factor));
-  return result ?? false;
+  return result ?? true;
 }
 
 // 特定のファクターの記録を開始します 気軽に呼んで大丈夫です
@@ -27,8 +27,12 @@ void stopObserve(Factors factor) async {
 ローカルデータの読み込みを行います
 本来ならシングルトン設計するべきですが、面倒なので後回し
 loadAllDatas()を呼んでから動かしてください。コンストラクタに入れようとしたらできませんでした。
+-> できました
 */
 class DataManager {
+  DataManager() {
+    loadAllDatas();
+  }
   Map<DateTime, int> atmData = {};
   Map<DateTime, int> calData = {};
   Map<DateTime, int> tempData = {};
@@ -59,6 +63,7 @@ class DataManager {
     try {
       final file = getFileOf(Factors.atomosphere);
       data = file.toString();
+      print(data);
     } catch (e) {
       return;
     }
@@ -104,6 +109,7 @@ class DataManager {
     try {
       final file = getFileOf(Factors.atomosphere);
       data = file.toString();
+      print(data);
     } catch (e) {
       return;
     }
@@ -149,6 +155,7 @@ class DataManager {
     try {
       final file = getFileOf(Factors.atomosphere);
       data = file.toString();
+      print(data);
     } catch (e) {
       return;
     }
@@ -203,5 +210,25 @@ class DataManager {
     final date = dt.day;
     final file = await getFileOf(factor);
     file.writeAsString("$year/$month/$date $data,");
+    loadAllDatas();
+  }
+
+  int? getDataOf(Factors factor, String when) {
+    switch (factor) {
+      case Factors.atomosphere:
+        return atmData[when];
+      case Factors.calorie:
+        return calData[when];
+      case Factors.temperature:
+        return tempData[when];
+    }
+  }
+
+  String today() {
+    DateTime dt = DateTime.now();
+    final year = dt.year;
+    final month = dt.month;
+    final date = dt.day;
+    return "$year/$month/$date";
   }
 }

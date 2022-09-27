@@ -1,6 +1,8 @@
+import 'package:first_app/LocalDataAccess/local_data_access.dart';
 import 'package:flutter/material.dart';
 import '../shared_definitions.dart';
 import 'atomosphere_enter_widget.dart';
+import 'atomosphere_view_widget.dart';
 
 // 調子を入力する画面です
 //
@@ -11,35 +13,34 @@ class ChoshiEnterPage extends StatefulWidget {
 }
 
 class _ChoshiEnterPageState extends State<ChoshiEnterPage> {
-  var data = <StatefulWidget>[];
+  _ChoshiEnterPageState() {
+    loadWidgets();
+  }
+  var data = <Widget>[];
   @override
   Widget build(BuildContext context) {
     loadWidgets();
-    return ListView(
-      children: data,
+    return GestureDetector(
+      onTap: () {
+        setState(() {});
+      },
+      child: ListView(
+        children: data,
+      ),
     );
   }
 
-  // ローカルファイルを検索し、その日すでに入力が行われているか確認します
-  bool isAlreadyEntered(Factors factor) {
-    return false;
-  }
-
-  // ユーザーがそのファクターを紐づけているかどうかを返します
-  bool isObserved(Factors factor) {
-    return true;
-  }
-
-  void loadWidgets() {
+  void loadWidgets() async {
     data.clear();
-    if (isObserved(Factors.atomosphere)) {
+    final dm = DataManager();
+    if (await isObserved(Factors.atomosphere)) {
       // 気圧が対象ファクターの時
-      if (!isAlreadyEntered(Factors.atomosphere)) {
+      if (dm.getDataOf(Factors.atomosphere, dm.today()) == null) {
         // 未記入→記入画面生成
         data.add(const AtomosphereEnterWidget());
       } else {
         // 記入済み 記入情報表示
-        // data.add(const AtomosphereShowWidget())
+        data.add(const AtomosphereViewWidget());
       }
     }
   }
