@@ -1,153 +1,131 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:fl_chart/fl_chart.dart';
-import './enterChosi.dart';
-import './recentChosi.dart';
-import './trendChosi.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:kaihatsu_dojo_flutter/constants/const.dart';
+import 'package:kaihatsu_dojo_flutter/model/symplemodel/dayModel.dart';
+import 'package:kaihatsu_dojo_flutter/view/graphPage.dart';
+import 'package:kaihatsu_dojo_flutter/view/userPage.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+import 'view/homePage.dart';
+import 'view/recordPage.dart';
 
-enum Factors {
-  atomosphere,
-  temprature,
-  calorie,
+
+
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const MainPage(),
+      title: 'Weight Record',
+      home: MyHomePage(),
     );
   }
 }
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
-  @override
-  _MainPageState createState() => _MainPageState();
-}
 
-class _MainPageState extends State<MainPage> {
-  final tab = <Tab>[
-    Tab(text: "Enter Choshi", icon: const Icon(Icons.directions_car)),
-    Tab(text: "Recent Choshi", icon: const Icon(Icons.directions_bike)),
-    Tab(text: "Choshi Trends", icon: const Icon(Icons.directions_boat))
-  ];
+///initialPage
+class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: tab.length,
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text("Jinx"),
-            bottom: TabBar(
-              tabs: tab,
-            ),
-          ),
-          body: const TabBarView(children: [
-            AtomosphereEnterWidget(),
-            TabPage(icon: Icons.directions_bike, title: "Recent Choshi"),
-            TabPage(icon: Icons.directions_boat, title: "Choshi Trends")
-          ]),
-        ));
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasData) {
+          return Tab();
+        } else {
+          return UserPage();
+        }
+      },
+    );
   }
 }
 
-class TabPage extends StatelessWidget {
-  final IconData icon;
-  final String title;
+///navigation
+class Tab extends StatelessWidget {
+  final PersistentTabController _controller =
+      PersistentTabController(initialIndex: 0);
+  final _dayModel = DayModel();
 
-  const TabPage({super.key, required this.icon, required this.title});
+  List<Widget> _buildScreens() {
+    return [
+      HomePage(),
+      RecordPage(date: _dayModel.formattedDate(date: DateTime.now())),
+      GraphPage(),
+    ];
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle textStyle = Theme.of(context).textTheme.headline1!;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Icon(icon, size: 64.0, color: textStyle.color),
-          Text(title, style: textStyle),
-        ],
+  List<PersistentBottomNavBarItem> _navBarsItems() {
+    return [
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.view_carousel_outlined),
+        //title: '',
+        activeColorPrimary: kBaseColour,
+        inactiveColorPrimary: kAccentColour,
       ),
-    );
-  }
-}
-
-class ChoshiEnterPage extends StatefulWidget {
-  const ChoshiEnterPage({super.key});
-  @override
-  _ChoshiEnterPageState createState() => _ChoshiEnterPageState();
-}
-
-class _ChoshiEnterPageState extends State<ChoshiEnterPage> {
-  var data = <StatefulWidget>[];
-  @override
-  Widget build(BuildContext context) {
-    loadWidgets();
-    return ListView(
-      children: data,
-    );
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.note_add_outlined),
+        //title: '',
+        activeColorPrimary: kBaseColour,
+        inactiveColorPrimary: kAccentColour,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.auto_graph_outlined),
+        //title: '',
+        activeColorPrimary: kBaseColour,
+        inactiveColorPrimary: kAccentColour,
+      ),
+    ];
   }
 
-  bool isAlreadyEntered(Factors factor) {
-    return false;
-  }
-
-  bool isObserved(Factors factor) {
-    return true;
-  }
-
-  void loadWidgets() {
-    if (isObserved(Factors.atomosphere)) {
-      data.add(const AtomosphereEnterWidget());
-    }
-  }
-}
-
-class AtomosphereEnterWidget extends StatefulWidget {
-  const AtomosphereEnterWidget({super.key});
-  @override
-  _AtomosphereEnterWidget createState() => _AtomosphereEnterWidget();
-}
-
-class _AtomosphereEnterWidget extends State<AtomosphereEnterWidget> {
-  final txtcontroller = TextEditingController();
-  var atomosphere = 0;
-  void enterAtm() {}
   @override
   Widget build(BuildContext context) {
-    // final TextStyle textStyle = Theme.of(context).textTheme.headline1!;
-    return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(children: [
-          const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "current atomosphere",
-                textAlign: TextAlign.left,
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w100),
-              )),
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextField(
-                controller: txtcontroller,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                textAlign: TextAlign.right,
-              )),
-          TextButton(
-              onPressed: () {
-                FocusScope.of(context).unfocus();
-              },
-              child: const Text("Enter"))
-        ]));
+    return PersistentTabView(
+      context,
+      controller: _controller,
+      screens: _buildScreens(),
+      items: _navBarsItems(),
+      confineInSafeArea: true,
+      backgroundColor: kMainColour,
+      // Default is Colors.white.
+      handleAndroidBackButtonPress: true,
+      // Default is true.
+      // ignore: lines_longer_than_80_chars
+      resizeToAvoidBottomInset: true,
+      stateManagement: true,
+      // Default is true.
+      // ignore: lines_longer_than_80_chars
+      hideNavigationBarWhenKeyboardShows: true,
+      decoration: NavBarDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        colorBehindNavBar: kMainColour,
+      ),
+      popAllScreensOnTapOfSelectedTab: true,
+      popActionScreens: PopActionScreensType.all,
+      itemAnimationProperties: const ItemAnimationProperties(
+        // Navigation Bar's items animation properties.
+        duration: Duration(milliseconds: 200),
+        curve: Curves.ease,
+      ),
+      screenTransitionAnimation: const ScreenTransitionAnimation(
+        // Screen transition animation on change of selected tab.
+        animateTabTransition: true,
+        curve: Curves.ease,
+        duration: Duration(milliseconds: 200),
+      ),
+      navBarStyle:
+          NavBarStyle.style6, // Choose the nav bar style with this property.
+    );
   }
 }
