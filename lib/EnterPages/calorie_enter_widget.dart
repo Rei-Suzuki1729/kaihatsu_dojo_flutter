@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // 気圧の入力画面です
-class AtomosphereEnterWidget extends StatefulWidget {
-  const AtomosphereEnterWidget({super.key});
+class CalorieEnterWidget extends StatefulWidget {
+  const CalorieEnterWidget({super.key});
   @override
-  _AtomosphereEnterWidgetState createState() => _AtomosphereEnterWidgetState();
+  _CalorieEnterWidgetState createState() => _CalorieEnterWidgetState();
 }
 
-class _AtomosphereEnterWidgetState extends State<AtomosphereEnterWidget> {
+class _CalorieEnterWidgetState extends State<CalorieEnterWidget> {
   final txtcontroller = TextEditingController();
   var atomosphere = 0;
   void enterAtm() {}
@@ -23,7 +23,7 @@ class _AtomosphereEnterWidgetState extends State<AtomosphereEnterWidget> {
           const Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "current atomosphere",
+                "calorie",
                 textAlign: TextAlign.left,
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.w100),
               )),
@@ -37,7 +37,7 @@ class _AtomosphereEnterWidgetState extends State<AtomosphereEnterWidget> {
                 textAlign: TextAlign.right,
               )),
               const SizedBox(
-                child: Text("hPa"),
+                child: Text("kcal"),
               )
             ],
           ),
@@ -46,8 +46,7 @@ class _AtomosphereEnterWidgetState extends State<AtomosphereEnterWidget> {
                 FocusScope.of(context).unfocus();
                 final dm = DataManager();
                 try {
-                  dm.writeData(
-                      Factors.atomosphere, int.parse(txtcontroller.text));
+                  dm.writeData(Factors.calorie, int.parse(txtcontroller.text));
                 } catch (err) {
                   return;
                 }

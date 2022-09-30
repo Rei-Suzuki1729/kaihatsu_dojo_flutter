@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // 気圧の入力画面です
-class AtomosphereEnterWidget extends StatefulWidget {
-  const AtomosphereEnterWidget({super.key});
+class ChoshiEnterWidget extends StatefulWidget {
+  const ChoshiEnterWidget({super.key});
   @override
-  _AtomosphereEnterWidgetState createState() => _AtomosphereEnterWidgetState();
+  _ChoshiEnterWidgetState createState() => _ChoshiEnterWidgetState();
 }
 
-class _AtomosphereEnterWidgetState extends State<AtomosphereEnterWidget> {
+class _ChoshiEnterWidgetState extends State<ChoshiEnterWidget> {
   final txtcontroller = TextEditingController();
   var atomosphere = 0;
   void enterAtm() {}
@@ -23,7 +23,7 @@ class _AtomosphereEnterWidgetState extends State<AtomosphereEnterWidget> {
           const Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "current atomosphere",
+                "choshi",
                 textAlign: TextAlign.left,
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.w100),
               )),
@@ -37,7 +37,7 @@ class _AtomosphereEnterWidgetState extends State<AtomosphereEnterWidget> {
                 textAlign: TextAlign.right,
               )),
               const SizedBox(
-                child: Text("hPa"),
+                child: Text("points"),
               )
             ],
           ),
@@ -46,8 +46,7 @@ class _AtomosphereEnterWidgetState extends State<AtomosphereEnterWidget> {
                 FocusScope.of(context).unfocus();
                 final dm = DataManager();
                 try {
-                  dm.writeData(
-                      Factors.atomosphere, int.parse(txtcontroller.text));
+                  dm.writeChoshiData(int.parse(txtcontroller.text));
                 } catch (err) {
                   return;
                 }

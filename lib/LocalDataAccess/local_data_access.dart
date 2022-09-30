@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../shared_definitions.dart';
 import 'package:path_provider/path_provider.dart';
@@ -33,9 +34,10 @@ class DataManager {
   DataManager() {
     loadAllDatas();
   }
-  Map<DateTime, int> atmData = {};
-  Map<DateTime, int> calData = {};
-  Map<DateTime, int> tempData = {};
+  Map<String, int> atmData = {};
+  Map<String, int> calData = {};
+  Map<String, int> tempData = {};
+  Map<String, int> choshiData = {};
   Future<String> get localPath async {
     final dir = await getApplicationDocumentsDirectory();
     return dir.path;
@@ -53,19 +55,24 @@ class DataManager {
     }
   }
 
-  void loadAtmData() {
-    String data;
+  Future<File> getChoshiFile() async {
+    final path = await localPath;
+    return File("$path/choshi.txt");
+  }
+
+  Future<Map<String, int>> loadAtmData() async {
+    String data = "";
     int currentVal = 0;
     int month = 0;
     int year = 0;
     int date = 0;
     int info = 0;
+    Map<String, int> atm = {};
     try {
-      final file = getFileOf(Factors.atomosphere);
-      data = file.toString();
-      print(data);
+      var mayFile = await getFileOf(Factors.atomosphere);
+      data = mayFile.readAsStringSync();
     } catch (e) {
-      return;
+      return {};
     }
     for (var i = 0; i < data.length; i++) {
       final character = data[i];
@@ -89,29 +96,30 @@ class DataManager {
       if (character == ",") {
         info = currentVal;
         currentVal = 0;
-        DateTime dt = DateTime(year, month, date);
-        atmData[dt] = info;
+        atm["$year/$month/$date"] = info;
         month = 0;
         year = 0;
         date = 0;
         info = 0;
       }
     }
+    return atm;
   }
 
-  void loadTempData() {
+  Future<Map<String, int>> loadTempData() async {
     String data;
     int currentVal = 0;
     int month = 0;
     int year = 0;
     int date = 0;
     int info = 0;
+    Map<String, int> temp = {};
     try {
-      final file = getFileOf(Factors.atomosphere);
-      data = file.toString();
-      print(data);
+      var file = await getFileOf(Factors.temperature);
+      data = file.readAsStringSync();
+      debugPrint(data);
     } catch (e) {
-      return;
+      return temp;
     }
     for (var i = 0; i < data.length; i++) {
       final character = data[i];
@@ -135,29 +143,30 @@ class DataManager {
       if (character == ",") {
         info = currentVal;
         currentVal = 0;
-        DateTime dt = DateTime(year, month, date);
-        tempData[dt] = info;
+        temp["$year/$month/$date"] = info;
         month = 0;
         year = 0;
         date = 0;
         info = 0;
       }
     }
+    return temp;
   }
 
-  void loadCalData() {
+  Future<Map<String, int>> loadCalData() async {
     String data;
     int currentVal = 0;
     int month = 0;
     int year = 0;
     int date = 0;
     int info = 0;
+    Map<String, int> cal = {};
     try {
-      final file = getFileOf(Factors.atomosphere);
-      data = file.toString();
-      print(data);
+      var file = await getFileOf(Factors.calorie);
+      data = file.readAsStringSync();
+      debugPrint(data);
     } catch (e) {
-      return;
+      return cal;
     }
     for (var i = 0; i < data.length; i++) {
       final character = data[i];
@@ -181,26 +190,75 @@ class DataManager {
       if (character == ",") {
         info = currentVal;
         currentVal = 0;
-        DateTime dt = DateTime(year, month, date);
-        calData[dt] = info;
+        cal["$year/$month/$date"] = info;
         month = 0;
         year = 0;
         date = 0;
         info = 0;
       }
     }
+    return cal;
   }
 
-  void loadAllDatas() async {
+  Future<Map<String, int>> loadChoshi() async {
+    String data;
+    int currentVal = 0;
+    int month = 0;
+    int year = 0;
+    int date = 0;
+    int info = 0;
+    Map<String, int> choshi = {};
+    try {
+      var file = await getChoshiFile();
+      data = file.readAsStringSync();
+      debugPrint(data);
+    } catch (e) {
+      return choshi;
+    }
+    for (var i = 0; i < data.length; i++) {
+      final character = data[i];
+      int? intData = int.tryParse(character);
+      if (intData != null) {
+        currentVal = currentVal * 10 + intData;
+        continue;
+      }
+      if (character == "/") {
+        if (year == 0) {
+          year = currentVal;
+        } else {
+          month = currentVal;
+        }
+        currentVal = 0;
+      }
+      if (character == " ") {
+        date = currentVal;
+        currentVal = 0;
+      }
+      if (character == ",") {
+        info = currentVal;
+        currentVal = 0;
+        choshi["$year/$month/$date"] = info;
+        month = 0;
+        year = 0;
+        date = 0;
+        info = 0;
+      }
+    }
+    return choshi;
+  }
+
+  Future<int> loadAllDatas() async {
     if (await isObserved(Factors.atomosphere)) {
-      loadAtmData();
+      atmData = await loadAtmData();
     }
     if (await isObserved(Factors.temperature)) {
-      loadTempData();
+      tempData = await loadTempData();
     }
     if (await isObserved(Factors.calorie)) {
-      loadCalData();
+      calData = await loadCalData();
     }
+    choshiData = await loadChoshi();
+    return 0;
   }
 
   void writeData(Factors factor, int data) async {
@@ -210,10 +268,21 @@ class DataManager {
     final date = dt.day;
     final file = await getFileOf(factor);
     file.writeAsString("$year/$month/$date $data,");
-    loadAllDatas();
+    await loadAllDatas();
   }
 
-  int? getDataOf(Factors factor, String when) {
+  void writeChoshiData(int data) async {
+    DateTime dt = DateTime.now();
+    final year = dt.year;
+    final month = dt.month;
+    final date = dt.day;
+    final file = await getChoshiFile();
+    file.writeAsString("$year/$month/$date $data,");
+    await loadAllDatas();
+  }
+
+  Future<int?> getDataOf(Factors factor, String when) async {
+    await loadAllDatas();
     switch (factor) {
       case Factors.atomosphere:
         return atmData[when];
@@ -222,6 +291,11 @@ class DataManager {
       case Factors.temperature:
         return tempData[when];
     }
+  }
+
+  Future<int?> getChoshiDataAt(String when) async {
+    await loadAllDatas();
+    return choshiData[when];
   }
 
   String today() {

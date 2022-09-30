@@ -1,3 +1,9 @@
+import 'package:first_app/EnterPages/calorie_enter_widget.dart';
+import 'package:first_app/EnterPages/calorie_view_widget.dart';
+import 'package:first_app/EnterPages/choshi_enter_widget.dart';
+import 'package:first_app/EnterPages/choshi_view_widget.dart';
+import 'package:first_app/EnterPages/temp_enter_widget.dart';
+import 'package:first_app/EnterPages/temp_view_widget.dart';
 import 'package:first_app/LocalDataAccess/local_data_access.dart';
 import 'package:flutter/material.dart';
 import '../shared_definitions.dart';
@@ -17,12 +23,15 @@ class _ChoshiEnterPageState extends State<ChoshiEnterPage> {
     loadWidgets();
   }
   var data = <Widget>[];
+  final atmEnter = const AtomosphereEnterWidget();
+  final tempEnter = const TemperatureEnterWidget();
+  final calEnter = const CalorieEnterWidget();
+  final manager = DataManager();
   @override
   Widget build(BuildContext context) {
-    loadWidgets();
     return GestureDetector(
       onTap: () {
-        setState(() {});
+        loadWidgets();
       },
       child: ListView(
         children: data,
@@ -32,16 +41,44 @@ class _ChoshiEnterPageState extends State<ChoshiEnterPage> {
 
   void loadWidgets() async {
     data.clear();
-    final dm = DataManager();
     if (await isObserved(Factors.atomosphere)) {
       // 気圧が対象ファクターの時
-      if (dm.getDataOf(Factors.atomosphere, dm.today()) == null) {
+      if (await manager.getDataOf(Factors.atomosphere, manager.today()) ==
+          null) {
         // 未記入→記入画面生成
-        data.add(const AtomosphereEnterWidget());
+        data.add(atmEnter);
       } else {
         // 記入済み 記入情報表示
-        data.add(const AtomosphereViewWidget());
+        final vd =
+            (await manager.getDataOf(Factors.atomosphere, manager.today()))!;
+        data.add(AtomosphereViewWidget(data: vd));
       }
     }
+    if (await isObserved(Factors.temperature)) {
+      if (await manager.getDataOf(Factors.temperature, manager.today()) ==
+          null) {
+        data.add(tempEnter);
+      } else {
+        final vd =
+            (await manager.getDataOf(Factors.temperature, manager.today()))!;
+        data.add(TemperatureViewWidget(data: vd));
+      }
+    }
+
+    if (await isObserved(Factors.calorie)) {
+      if (await manager.getDataOf(Factors.calorie, manager.today()) == null) {
+        data.add(calEnter);
+      } else {
+        final vd = (await manager.getDataOf(Factors.calorie, manager.today()))!;
+        data.add(CalorieViewWidget(data: vd));
+      }
+    }
+    if (await manager.getChoshiDataAt(manager.today()) == null) {
+      data.add(const ChoshiEnterWidget());
+    } else {
+      final vd = (await manager.getChoshiDataAt(manager.today()))!;
+      data.add(ChoshiViewWidget(data: vd));
+    }
+    setState(() {});
   }
 }
