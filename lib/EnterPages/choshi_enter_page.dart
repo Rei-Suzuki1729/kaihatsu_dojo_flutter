@@ -31,7 +31,7 @@ class _ChoshiEnterPageState extends State<ChoshiEnterPage> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        loadWidgets();
+        //loadWidgets();
       },
       child: ListView(
         children: data,
@@ -39,7 +39,13 @@ class _ChoshiEnterPageState extends State<ChoshiEnterPage> {
     );
   }
 
-  void loadWidgets() async {
+  // @override
+  // void initState() async {
+  //   await loadWidgets();
+  //   super.initState();
+  // }
+
+  Future<int> loadWidgets() async {
     data.clear();
     if (await isObserved(Factors.atomosphere)) {
       // 気圧が対象ファクターの時
@@ -80,5 +86,6 @@ class _ChoshiEnterPageState extends State<ChoshiEnterPage> {
       data.add(ChoshiViewWidget(data: vd));
     }
     setState(() {});
+    return 0;
   }
 }

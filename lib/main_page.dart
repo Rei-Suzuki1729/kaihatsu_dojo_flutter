@@ -1,3 +1,4 @@
+import 'package:first_app/GraphPages/graph_view_page.dart';
 import 'package:flutter/material.dart';
 import 'current_page.dart';
 import 'EnterPages/choshi_enter_page.dart';
@@ -35,7 +36,7 @@ class _MainPageState extends State<MainPage> {
             ChoshiEnterPage(),
 
             // グラフ表示画面ですが今は仮置きです
-            TabPage(icon: Icons.directions_bike, title: "Recent Choshi"),
+            GraphViewPage(),
 
             // 共有画面ですが今は仮置きです
             TabPage(icon: Icons.directions_boat, title: "Choshi Trends")
